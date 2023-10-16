@@ -2,7 +2,7 @@
     import { db } from "$lib/firebase"
     import { set, ref, get, child } from "firebase/database";
     import "$lib/cryptico.min.js"
-    import { privateKeyStore, publicKeyStore } from "$lib/stores"
+    import { privateKeyStore, publicKeyStore, userIdStore } from "$lib/stores"
     import { goto } from "$app/navigation";
 
     let login_username = "",
@@ -22,6 +22,7 @@
                 const publicKey = cryptico.publicKeyString(key)
                 privateKeyStore.set(key)
                 publicKeyStore.set(publicKey)
+                userIdStore.set(MD5(SHA256(login_username)))
                 return goto("/home")
             } else {
                 return alert("Wrong login.")
@@ -46,6 +47,7 @@
         })
         privateKeyStore.set(key)
         publicKeyStore.set(publicKey)
+        userIdStore.set(hashedUname)
         return goto("/home")
     }
 
