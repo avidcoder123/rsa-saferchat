@@ -26,7 +26,7 @@
             chatname = receiverID + ownID
         }
         //Create initial message
-        await set(ref(db, `/chat/${chatname}`), {
+        await set(ref(db, `/chats/${chatname}`), {
             member1: ownID,
             member2: receiverID,
             chat2: encrypted //Send message to member 2
@@ -34,9 +34,11 @@
         //Add chat to each user's list
         await set(push(ref(db, `users/${ownID}/chats`)), {id: chatname})
         await set(push(ref(db, `users/${receiverID}/chats`)), {id: chatname})
+        receiverID = ""
+        initMsg = ""
     }
 
-    let userChats = get(child(ref(db), `user/${ownID}/chats`))
+    let userChats = get(child(ref(db), `user/${ownID}/chats`)).then(x => x.val())
 </script>
 <div class="p-5 flex flex-col gap-3">
     <h1 class="text-white text-4xl">Your User ID is {ownID}</h1>
