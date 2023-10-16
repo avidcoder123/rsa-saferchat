@@ -2,6 +2,8 @@
     import { db } from "$lib/firebase"
     import { set, ref, get, child } from "firebase/database";
     import "$lib/cryptico.min.js"
+    import { privateKeyStore, publicKeyStore } from "$lib/stores"
+    import { goto } from "$app/navigation";
 
     let login_username = "",
     login_password = "",
@@ -14,10 +16,13 @@
         get(child(ref(db), `users/${hashedUname}`))
         .then(x => x.val())
         .then(val => {
-            if(SHA256(val.password) == SHA256(login_password)) {
+            if(!val) return alert("User doesn't exist")
+            if(val.password == SHA256(login_password)) {
                 const key = cryptico.generateRSAKey(login_username + login_password, 2048)
                 const publicKey = cryptico.publicKeyString(key)
-                //Set public key in keystore and redirect
+                privateKeyStore.set(key)
+                publicKeyStore.set(publicKey)
+                return goto("/home")
             } else {
                 return alert("Wrong login.")
             }
@@ -27,11 +32,8 @@
 
     async function register() {
         if(register_password != register_confirm) return alert("Passwords do not match.");
-        console.log("Hashing uname...")
         const hashedUname = MD5(SHA256(register_username)) //SHA256 to conceal, ND5 to make it a bit shorter
-        console.log("Making key...")
 
-        console.log("Checking for duplicate...")
         let existingUser = await get(child(ref(db), `users/${hashedUname}`)).then(x => x.val())
         if(existingUser) {
             return alert("Username already taken.")
@@ -42,7 +44,9 @@
             password: SHA256(register_password),
             publicKey
         })
-        //Set public key in keystore and redirect
+        privateKeyStore.set(key)
+        publicKeyStore.set(publicKey)
+        return goto("/home")
     }
 
 </script>
@@ -51,13 +55,13 @@
     <h1 class="text-4xl text-white">RSA-Saferchat</h1>
     <h1 class="text-2xl text-white">Login</h1>
     <input class="h-10 rounded-md border-white border-2 w-72 p-1" bind:value={login_username} placeholder="Username (Case sensitive)">
-    <input class="h-10 rounded-md border-white border-2 w-72 p-1" bind:value={login_password} placeholder="Password">
-    <button class="h-10 w-32 bg-blue-600 rounded-md p-1 text-white" on:click={login} disabled={!login_username || !login_password || login_password.length < 8}>Login</button>
+    <input class="h-10 rounded-md border-white border-2 w-72 p-1" bind:value={login_password} type="password" placeholder="Password">
+    <button class="h-10 w-52 bg-blue-600 rounded-md p-1 text-white" on:click={login} disabled={!login_username || !login_password || login_password.length < 8}>Login (May take a while)</button>
     <h1 class="text-2xl">Register</h1>
-    <input class="h-10 rounded-md border-white border-2 w-72 p-1" bind:value={register_username} placeholder="Username (Will be kept private, Case Sensitive)">
+    <input class="h-10 rounded-md border-white border-2 w-72 p-1" bind:value={register_username} placeholder="Username (Will be kept private)">
     <input class="h-10 rounded-md border-white border-2 w-72 p-1" bind:value={register_password} type="password" placeholder="Password (At least 8 characters, longer is better)">
     <input class="h-10 rounded-md border-white border-2 w-72 p-1" bind:value={register_confirm} type="password" placeholder="Confirm Password">
-    <button class="h-10 w-32 bg-blue-600 rounded-md p-1 text-white" on:click={() => register().then(() => null)} disabled=
+    <button class="h-10 w-52 bg-blue-600 rounded-md p-1 text-white" on:click={() => register().then(() => null)} disabled=
     {!register_username || !register_password || !register_confirm || register_password.length < 8}
-    >Register</button>
+    >Register (May take a while)</button>
 </div>
