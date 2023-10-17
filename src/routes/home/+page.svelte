@@ -44,16 +44,16 @@
         let obj = Object.values(val)
         let ids = obj.map((n: any) => n.id)
         let things = await Promise.all(ids.map(n => get(child(ref(db), `chats/${n}`))))
-        userChats = things.map(y => ({...y.val(), id: x}))
-        }
-    )
+        userChats = things.map((y, idx) => ({...y.val(), id: ids[idx]}))
+        console.log(userChats)
+    })
 
 
     function deleteChat(chatID: string) {
         if(confirm("Are you sure?")){
             set(ref(db, `chats/${chatID}`), null)
             .then(() => {
-                return get(child(ref(db), `/user/${ownID}/chats`)).then(x => x.val())
+                return get(child(ref(db), `users/${ownID}/chats`)).then(x => x.val())
             })
             .then(val => {
                 for(let key in val) {
@@ -116,7 +116,6 @@
             <button class="btn btn-sm bg-cyan-800">Open Chat</button>
             <button class="btn btn-sm bg-red-700" on:click={() => deleteChat(chat.id)}>Delete Chat</button>
           </div>
-        {:else}
         {/each}
     {/await}
 </div>
