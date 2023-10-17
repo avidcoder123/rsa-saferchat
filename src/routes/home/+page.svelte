@@ -46,7 +46,7 @@
     .then(x => Promise.all(x.map(y => y.val())))
 
     function deleteChat(chatID: string) {
-
+        get(child(ref(db), `chats/${chatID}`)).then(x )
     }
 </script>
 <div class="p-5 flex flex-col gap-3">
