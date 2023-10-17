@@ -46,7 +46,7 @@
     .then(x => Promise.all(x.map(y => y.val())))
 
     function deleteChat(chatID: string) {
-        set(ref(db, `chats/${chatID}`), null)
+        if(confirm("Are you sure?")) set(ref(db, `chats/${chatID}`), null) //TODO: Find out how to delete
     }
 </script>
 <div class="p-5 flex flex-col gap-3">
@@ -70,7 +70,7 @@
               <!-- <div class="text-xs">{alias}</div> -->
             </div>
             <button class="btn btn-sm bg-cyan-800">Open Chat</button>
-            <button class="btn btn-sm bg-red-700">Delete Chat</button>
+            <button class="btn btn-sm bg-red-700" on:click={() => deleteChat(chat.id)}>Delete Chat</button>
           </div>
         {/each}
     {/await}
