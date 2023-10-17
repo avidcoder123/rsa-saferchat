@@ -54,6 +54,12 @@
     <button class="h-10 w-52 bg-blue-600 rounded-md p-1 text-white" on:click={chatRequest}>Send Chat Request</button>
     <hr>
     {#await userChats then chatList}
-        <h1 class="text-white text-3xl">{JSON.stringify(chatList)}</h1>
+        {#each chatList as chat}
+            {#if chat.member1 == ownID}
+                <h1 class="text-2xl text-white">{chat.member2}</h1>
+            {:else}
+                <h1 class="text-2xl text-white">{chat.member1}</h1>
+            {/if}
+        {/each}
     {/await}
 </div>
