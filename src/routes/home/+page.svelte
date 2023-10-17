@@ -2,7 +2,7 @@
     import { goto } from "$app/navigation";
     import { db } from "$lib/firebase";
     import { privateKeyStore, publicKeyStore, userIdStore } from "$lib/stores"
-    import { child, get, push, ref, set, update } from "firebase/database";
+    import { child, get, push, ref, set } from "firebase/database";
     import { get as getVal } from "svelte/store"
 
     let ownID = getVal(userIdStore)
@@ -38,7 +38,12 @@
         initMsg = ""
     }
 
-    let userChats = get(child(ref(db), `users/${ownID}/chats`)).then(x => x.val())
+    let userChats = get(child(ref(db), `users/${ownID}/chats`))
+    .then(x => x.val())
+    .then(Object.values)
+    .then(obj => obj.map(x => x.id))
+    .then(obj => Promise.all(obj.map(x => get(child(ref(db), `chats/${x}`)))))
+    .then(x => Promise.all(x.map(y => y.val())))
 </script>
 <div class="p-5 flex flex-col gap-3">
     <h1 class="text-white text-4xl">Your User ID is {ownID}</h1>
