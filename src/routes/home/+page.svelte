@@ -2,7 +2,7 @@
     import { goto } from "$app/navigation";
     import { db } from "$lib/firebase";
     import { privateKeyStore, publicKeyStore, userIdStore } from "$lib/stores"
-    import { child, get, push, ref, set } from "firebase/database";
+    import { child, get, onValue, push, ref, set } from "firebase/database";
     import { get as getVal } from "svelte/store"
 
     let ownID = getVal(userIdStore)
@@ -38,18 +38,59 @@
         initMsg = ""
     }
 
-    let userChats = get(child(ref(db), `users/${ownID}/chats`))
-    .then(x => x.val())
-    .then(Object.values)
-    .then(obj => obj.map(x => x.id))
-    .then(obj => Promise.all(obj.map(x => get(child(ref(db), `chats/${x}`))
-    .then(y => ({...y.val(), id: x})))))
+    let userChats: any[] = []
+    onValue(ref(db, `users/${ownID}/chats`), async x => {
+        let val = x.val()
+        let obj = Object.values(val)
+        let ids = obj.map((n: any) => n.id)
+        let things = await Promise.all(ids.map(n => get(child(ref(db), `chats/${n}`))))
+        userChats = things.map(y => ({...y.val(), id: x}))
+        }
+    )
+
 
     function deleteChat(chatID: string) {
         if(confirm("Are you sure?")){
-            console.log(chatID)
-            set(ref(db, `chats/${chatID}`), null).then(() => goto("/"))
-        } //TODO: Find out how to delete
+            set(ref(db, `chats/${chatID}`), null)
+            .then(() => {
+                return get(child(ref(db), `/user/${ownID}/chats`)).then(x => x.val())
+            })
+            .then(val => {
+                for(let key in val) {
+                    if (val[key] == chatID) {
+                        set(ref(db, `users/${ownID}/chats/${chatID}`), null)
+                        break
+                    }
+                }
+            })
+            .then(() => {
+                let u1 = chatID.slice(0, chatID.length / 2)
+                let u2 = chatID.slice(chatID.length / 2, chatID.length)
+                let id = ""
+                if(u1 == ownID) {
+                    id = u2
+                } else {
+                    id = u1
+                }
+                return get(child(ref(db), `/user/${id}/chats`)).then(x => x.val())
+            })
+            .then(val => {
+                let u1 = chatID.slice(0, chatID.length / 2)
+                let u2 = chatID.slice(chatID.length / 2, chatID.length)
+                let id = ""
+                if(u1 == ownID) {
+                    id = u2
+                } else {
+                    id = u1
+                }
+                for(let key in val) {
+                    if (val[key] == chatID) {
+                        set(ref(db, `users/${id}/chats/${chatID}`), null)
+                        break
+                    }
+                }
+            })
+        }
     }
 </script>
 <div class="p-5 flex flex-col gap-3">
@@ -61,7 +102,7 @@
     <button class="h-10 w-52 bg-blue-600 rounded-md p-1 text-white" on:click={chatRequest}>Send Chat Request</button>
     <hr>
     {#await userChats then chatList}
-        {#each chatList as chat, idx}
+        {#each chatList as chat}
         <div class="alert">
             <div>
                 {#if chat.member1 == ownID}
@@ -75,6 +116,7 @@
             <button class="btn btn-sm bg-cyan-800">Open Chat</button>
             <button class="btn btn-sm bg-red-700" on:click={() => deleteChat(chat.id)}>Delete Chat</button>
           </div>
+        {:else}
         {/each}
     {/await}
 </div>

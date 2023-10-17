@@ -6,10 +6,6 @@
     import { goto } from "$app/navigation";
     import { get as getVal } from "svelte/store"
 
-    if(getVal(publicKeyStore).length != 0) {
-        goto("/home")
-    }
-
     let login_username = "",
     login_password = "",
     register_username = "",
