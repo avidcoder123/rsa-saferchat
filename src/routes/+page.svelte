@@ -4,6 +4,11 @@
     import "$lib/cryptico.min.js"
     import { privateKeyStore, publicKeyStore, userIdStore } from "$lib/stores"
     import { goto } from "$app/navigation";
+    import { get as getVal } from "svelte/store"
+
+    if(getVal(publicKeyStore).length != 0) {
+        goto("/home")
+    }
 
     let login_username = "",
     login_password = "",

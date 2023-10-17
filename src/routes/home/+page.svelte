@@ -42,11 +42,14 @@
     .then(x => x.val())
     .then(Object.values)
     .then(obj => obj.map(x => x.id))
-    .then(obj => Promise.all(obj.map(x => get(child(ref(db), `chats/${x}`)))))
-    .then(x => Promise.all(x.map(y => y.val())))
+    .then(obj => Promise.all(obj.map(x => get(child(ref(db), `chats/${x}`))
+    .then(y => ({...y.val(), id: x})))))
 
     function deleteChat(chatID: string) {
-        if(confirm("Are you sure?")) set(ref(db, `chats/${chatID}`), null) //TODO: Find out how to delete
+        if(confirm("Are you sure?")){
+            console.log(chatID)
+            set(ref(db, `chats/${chatID}`), null).then(() => goto("/"))
+        } //TODO: Find out how to delete
     }
 </script>
 <div class="p-5 flex flex-col gap-3">
@@ -58,7 +61,7 @@
     <button class="h-10 w-52 bg-blue-600 rounded-md p-1 text-white" on:click={chatRequest}>Send Chat Request</button>
     <hr>
     {#await userChats then chatList}
-        {#each chatList as chat}
+        {#each chatList as chat, idx}
         <div class="alert">
             <div>
                 {#if chat.member1 == ownID}
