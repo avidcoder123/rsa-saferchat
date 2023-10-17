@@ -38,7 +38,7 @@
         initMsg = ""
     }
 
-    let userChats = get(child(ref(db), `user/${ownID}/chats`)).then(x => x.val())
+    let userChats = get(child(ref(db), `users/${ownID}/chats`)).then(x => x.val())
 </script>
 <div class="p-5 flex flex-col gap-3">
     <h1 class="text-white text-4xl">Your User ID is {ownID}</h1>
