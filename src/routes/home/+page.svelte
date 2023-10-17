@@ -49,6 +49,6 @@
     <button class="h-10 w-52 bg-blue-600 rounded-md p-1 text-white" on:click={chatRequest}>Send Chat Request</button>
     <hr>
     {#await userChats then chatList}
-        {JSON.stringify(chatList)}
+        <h1 class="text-white text-3xl">{JSON.stringify(chatList)}</h1>
     {/await}
 </div>
