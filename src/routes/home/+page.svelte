@@ -45,51 +45,50 @@
         let ids = obj.map((n: any) => n.id)
         let things = await Promise.all(ids.map(n => get(child(ref(db), `chats/${n}`))))
         userChats = things.map((y, idx) => ({...y.val(), id: ids[idx]}))
-        console.log(userChats)
     })
 
 
     function deleteChat(chatID: string) {
         if(confirm("Are you sure?")){
             set(ref(db, `chats/${chatID}`), null)
-            .then(() => {
-                return get(child(ref(db), `users/${ownID}/chats`)).then(x => x.val())
-            })
-            .then(val => {
-                for(let key in val) {
-                    if (val[key] == chatID) {
-                        set(ref(db, `users/${ownID}/chats/${chatID}`), null)
-                        break
-                    }
-                }
-            })
-            .then(() => {
-                let u1 = chatID.slice(0, chatID.length / 2)
-                let u2 = chatID.slice(chatID.length / 2, chatID.length)
-                let id = ""
-                if(u1 == ownID) {
-                    id = u2
-                } else {
-                    id = u1
-                }
-                return get(child(ref(db), `/user/${id}/chats`)).then(x => x.val())
-            })
-            .then(val => {
-                let u1 = chatID.slice(0, chatID.length / 2)
-                let u2 = chatID.slice(chatID.length / 2, chatID.length)
-                let id = ""
-                if(u1 == ownID) {
-                    id = u2
-                } else {
-                    id = u1
-                }
-                for(let key in val) {
-                    if (val[key] == chatID) {
-                        set(ref(db, `users/${id}/chats/${chatID}`), null)
-                        break
-                    }
-                }
-            })
+            // .then(() => {
+            //     return get(child(ref(db), `users/${ownID}/chats`)).then(x => x.val())
+            // })
+            // .then(val => {
+            //     for(let key in val) {
+            //         if (val[key] == chatID) {
+            //             set(ref(db, `users/${ownID}/chats/${chatID}`), null)
+            //             break
+            //         }
+            //     }
+            // })
+            // .then(() => {
+            //     let u1 = chatID.slice(0, chatID.length / 2)
+            //     let u2 = chatID.slice(chatID.length / 2, chatID.length)
+            //     let id = ""
+            //     if(u1 == ownID) {
+            //         id = u2
+            //     } else {
+            //         id = u1
+            //     }
+            //     return get(child(ref(db), `/users/${id}/chats`)).then(x => x.val())
+            // })
+            // .then(val => {
+            //     let u1 = chatID.slice(0, chatID.length / 2)
+            //     let u2 = chatID.slice(chatID.length / 2, chatID.length)
+            //     let id = ""
+            //     if(u1 == ownID) {
+            //         id = u2
+            //     } else {
+            //         id = u1
+            //     }
+            //     for(let key in val) {
+            //         if (val[key] == chatID) {
+            //             set(ref(db, `users/${id}/chats/${chatID}`), null)
+            //             break
+            //         }
+            //     }
+            // })
         }
     }
 </script>
@@ -103,19 +102,21 @@
     <hr>
     {#await userChats then chatList}
         {#each chatList as chat}
-        <div class="alert">
-            <div>
-                {#if chat.member1 == ownID}
-                    <h3 class="font-bold">{chat.member2}</h3>
-                {:else}
-                    <h3 class="font-bold">{chat.member1}</h3>
-                {/if}
-              <!-- In the future, add alias here -->
-              <!-- <div class="text-xs">{alias}</div> -->
+        {#if chat.member1 && chat.member2}
+            <div class="alert">
+                <div>
+                    {#if chat.member1 == ownID}
+                        <h3 class="font-bold">{chat.member2}</h3>
+                    {:else}
+                        <h3 class="font-bold">{chat.member1}</h3>
+                    {/if}
+                <!-- In the future, add alias here -->
+                <!-- <div class="text-xs">{alias}</div> -->
+                </div>
+                <button class="btn btn-sm bg-cyan-800">Open Chat</button>
+                <button class="btn btn-sm bg-red-700" on:click={() => deleteChat(chat.id)}>Delete Chat</button>
             </div>
-            <button class="btn btn-sm bg-cyan-800">Open Chat</button>
-            <button class="btn btn-sm bg-red-700" on:click={() => deleteChat(chat.id)}>Delete Chat</button>
-          </div>
+        {/if}
         {/each}
     {/await}
 </div>
