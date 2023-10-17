@@ -44,6 +44,10 @@
     .then(obj => obj.map(x => x.id))
     .then(obj => Promise.all(obj.map(x => get(child(ref(db), `chats/${x}`)))))
     .then(x => Promise.all(x.map(y => y.val())))
+
+    function deleteChat(chatID: string) {
+
+    }
 </script>
 <div class="p-5 flex flex-col gap-3">
     <h1 class="text-white text-4xl">Your User ID is {ownID}</h1>
@@ -55,11 +59,19 @@
     <hr>
     {#await userChats then chatList}
         {#each chatList as chat}
-            {#if chat.member1 == ownID}
-                <h1 class="text-2xl text-white">{chat.member2}</h1>
-            {:else}
-                <h1 class="text-2xl text-white">{chat.member1}</h1>
-            {/if}
+        <div class="alert">
+            <div>
+                {#if chat.member1 == ownID}
+                    <h3 class="font-bold">{chat.member2}</h3>
+                {:else}
+                    <h3 class="font-bold">{chat.member1}</h3>
+                {/if}
+              <!-- In the future, add alias here -->
+              <!-- <div class="text-xs">{alias}</div> -->
+            </div>
+            <button class="btn btn-sm bg-cyan-800">Open Chat</button>
+            <button class="btn btn-sm bg-red-700">Delete Chat</button>
+          </div>
         {/each}
     {/await}
 </div>
