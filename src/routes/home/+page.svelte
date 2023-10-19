@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { db } from "$lib/firebase";
-    import { privateKeyStore, publicKeyStore, userIdStore } from "$lib/stores"
+    import { currentChatStore, privateKeyStore, publicKeyStore, userIdStore } from "$lib/stores"
     import { child, get, onValue, push, ref, set } from "firebase/database";
     import { get as getVal } from "svelte/store"
 
@@ -17,7 +17,7 @@
         let receiver = await get(child(ref(db), `users/${receiverID}`)).then(x => x.val())
         if(!receiver) return alert("Invalid Receiver ID. Check your spelling.")
         //Encrypt the hello message
-        let encrypted = cryptico.encrypt(initMsg, receiver.publicKey, getVal(privateKeyStore)).cipher!
+        let encrypted = cryptico.encrypt(encodeURI(initMsg), receiver.publicKey, getVal(privateKeyStore)).cipher!
         let chatname = ""
         //Put ownerIDs in alphabetical order
         if(ownID < receiverID) {
@@ -43,10 +43,15 @@
         let val = x.val()
         let obj = Object.values(val)
         let ids = obj.map((n: any) => n.id)
+        ids = [...new Set(ids)]
         let things = await Promise.all(ids.map(n => get(child(ref(db), `chats/${n}`))))
         userChats = things.map((y, idx) => ({...y.val(), id: ids[idx]}))
     })
 
+    function gotoChat(id: string) {
+        currentChatStore.set(id)
+        goto("/chat")
+    }
 
     function deleteChat(chatID: string) {
         if(confirm("Are you sure?")){
@@ -102,21 +107,21 @@
     <hr>
     {#await userChats then chatList}
         {#each chatList as chat}
-        {#if chat.member1 && chat.member2}
-            <div class="alert">
-                <div>
-                    {#if chat.member1 == ownID}
-                        <h3 class="font-bold">{chat.member2}</h3>
-                    {:else}
-                        <h3 class="font-bold">{chat.member1}</h3>
-                    {/if}
-                <!-- In the future, add alias here -->
-                <!-- <div class="text-xs">{alias}</div> -->
+            {#if chat.member1 && chat.member2}
+                <div class="alert">
+                    <div>
+                        {#if chat.member1 == ownID}
+                            <h3 class="font-bold">{chat.member2}</h3>
+                        {:else}
+                            <h3 class="font-bold">{chat.member1}</h3>
+                        {/if}
+                    <!-- In the future, add alias here -->
+                    <!-- <div class="text-xs">{alias}</div> -->
+                    </div>
+                    <button class="btn btn-sm bg-cyan-800" on:click={() => gotoChat(chat.id)}>Open Chat</button>
+                    <button class="btn btn-sm bg-red-700" on:click={() => deleteChat(chat.id)}>Delete Chat</button>
                 </div>
-                <button class="btn btn-sm bg-cyan-800">Open Chat</button>
-                <button class="btn btn-sm bg-red-700" on:click={() => deleteChat(chat.id)}>Delete Chat</button>
-            </div>
-        {/if}
+            {/if}
         {/each}
     {/await}
 </div>
