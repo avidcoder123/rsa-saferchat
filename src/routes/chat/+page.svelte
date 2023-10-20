@@ -65,27 +65,41 @@
             document.getElementById("submit")!.click();
         }
         });
-    })    
+    })
+    let chatText = "" 
+
+    function sendMsg() {
+        chatList = [...chatList, {
+            sender: memberID,
+            text: chatText,
+            verified: true
+        }]
+        chatText = ""
+        //TODO: update in fbase
+    }
 
 </script>
 {#each chatList as msg}
-  <div class="alert">
-    <div>
-      <h3 class="font-bold">
-        {msg.sender == memberID ? "You" : members[msg.sender - 1]}
-        {#if msg.sender != memberID}
-            {#if msg.verified}
-                <div class="badge badge-success">Verified</div>
-            {:else}
-                <div class="badge badge-error">Signature forged! The message may have been sent by a hacker!</div>
+<div class="flex flex-col">
+    <!-- TODO: Gap between msgs -->
+    <div class={"py-2 alert " + (msg.sender == memberID ? "alert-success" : "")}>
+        <div>
+          <h3 class="font-bold">
+            {msg.sender == memberID ? "You" : members[msg.sender - 1]}
+            {#if msg.sender != memberID}
+                {#if msg.verified}
+                    <div class="badge badge-success">Verified</div>
+                {:else}
+                    <div class="badge badge-error">Signature forged! The message may have been sent by a hacker!</div>
+                {/if}
             {/if}
-        {/if}
-    </h3>
-    <div class="text-lg">{msg.text}</div>
-    </div>
-  </div>
+        </h3>
+        <div class="text-lg">{msg.text}</div>
+        </div>
+      </div>
+</div>
 {/each}
 <div class="flex flex-row fixed bottom-0 w-full">
-    <input class="w-[85%] h-12 pl-2" placeholder="Enter message" id="chatbox" autofocus/>
-    <button class="w-[15%] h-12 bg-success text-black text-lg" id="submit" on:click={() => alert("Hello")}>Send</button>
+    <input class="w-[85%] h-12 pl-2" placeholder="Enter message" id="chatbox" bind:value={chatText} autofocus/>
+    <button class="w-[15%] h-12 bg-success text-black text-lg" id="submit" on:click={sendMsg}>Send</button>
 </div>
