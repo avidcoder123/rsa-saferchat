@@ -63,7 +63,7 @@
         {#if msg.verified}
             <div class="badge badge-success">Verified</div>
         {:else}
-            <div class="badge badge-error">Signature forged! The message </div>
+            <div class="badge badge-error">Signature forged! The message may have been sent by a hacker!</div>
         {/if}
     </h3>
       <div class="text-lg">{msg.text}</div>
