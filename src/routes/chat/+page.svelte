@@ -3,6 +3,7 @@
     import { db } from "$lib/firebase";
     import { currentChatStore, privateKeyStore, publicKeyStore, userIdStore } from "$lib/stores";
     import { child, get, ref } from "firebase/database";
+    import { onMount } from "svelte";
     import { get as getVal } from "svelte/store";
 
     let chatid = getVal(currentChatStore)
@@ -54,16 +55,17 @@
         }
     })
 
-    // Execute a function when the user presses a key on the keyboard
-    document.getElementById("chatbox")!.addEventListener("keypress", function(event) {
-    // If the user presses the "Enter" key on the keyboard
-    if (event.key === "Enter") {
-        // Cancel the default action, if needed
-        event.preventDefault();
-        // Trigger the button element with a click
-        document.getElementById("submit")!.click();
-    }
-    });
+    onMount(() => {
+        document.getElementById("chatbox")!.addEventListener("keypress", function(event) {
+        // If the user presses the "Enter" key on the keyboard
+        if (event.key === "Enter") {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            // Trigger the button element with a click
+            document.getElementById("submit")!.click();
+        }
+        });
+    })    
 
 </script>
 {#each chatList as msg}
