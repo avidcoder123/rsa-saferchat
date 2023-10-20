@@ -54,6 +54,17 @@
         }
     })
 
+    // Execute a function when the user presses a key on the keyboard
+    document.getElementById("chatbox")!.addEventListener("keypress", function(event) {
+    // If the user presses the "Enter" key on the keyboard
+    if (event.key === "Enter") {
+        // Cancel the default action, if needed
+        event.preventDefault();
+        // Trigger the button element with a click
+        document.getElementById("submit")!.click();
+    }
+    });
+
 </script>
 {#each chatList as msg}
   <div class="alert">
@@ -72,4 +83,7 @@
     </div>
   </div>
 {/each}
-<input class="w-full h-8" placeholder="Press enter to send message" />
+<div class="flex flex-row fixed bottom-0 w-full">
+    <input class="w-[85%] h-12 pl-2" placeholder="Enter message" id="chatbox" autofocus/>
+    <button class="w-[15%] h-12 bg-success text-black text-lg" id="submit" on:click={() => alert("Hello")}>Send</button>
+</div>
