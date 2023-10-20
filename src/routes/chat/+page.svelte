@@ -16,6 +16,8 @@
     //Whether you are user 1 or 2 in the chat
     let memberID = 0
 
+    let members: string[] = []
+
     
     let otherPublicKey = ""
 
@@ -25,7 +27,8 @@
         verified: boolean
     }[] = []
 
-    let chatPromise = get(child(ref(db), "chats/" + chatid)).then(x => x.val()).then(c => {
+    get(child(ref(db), "chats/" + chatid)).then(x => x.val()).then(c => {
+        members = [c.member1, c.member2]
         let otherID = ""
         if(c.member1 == myID) {
             memberID = 1
@@ -52,17 +55,18 @@
     })
 
 </script>
-{#await chatPromise}
-    {#each chatList as msg}
-        <div class="alert alert-success">
-            <span>{msg.text}</span>
-      </div>
-      <div class="alert alert-success">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        <div>
-          <h3 class="font-bold">New message!</h3>
-          <div class="text-xs">{msg.text}</div>
-        </div>
-      </div>
-    {/each}
-{/await}
+{#each chatList as msg}
+  <div class="alert">
+    <div>
+      <h3 class="font-bold">
+        {msg.sender == memberID ? "You" : members[msg.sender - 1]}
+        {#if msg.verified}
+            <div class="badge badge-success">Verified</div>
+        {:else}
+            <div class="badge badge-error">Signature forged! The message </div>
+        {/if}
+    </h3>
+      <div class="text-lg">{msg.text}</div>
+    </div>
+  </div>
+{/each}
