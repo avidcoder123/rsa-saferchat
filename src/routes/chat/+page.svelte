@@ -49,7 +49,7 @@
             chatList = [...chatList, ({
                 sender: memberID == 1 ? 2 : 1,
                 text: decodeURI(decryptedMsg.plaintext),
-                verified: decryptedMsg.signature == "verified"
+                verified: decryptedMsg.signature == "verified" && decryptedMsg.publicKeyString == otherPublicKey
             })]
         }
     })
@@ -60,13 +60,16 @@
     <div>
       <h3 class="font-bold">
         {msg.sender == memberID ? "You" : members[msg.sender - 1]}
-        {#if msg.verified}
-            <div class="badge badge-success">Verified</div>
-        {:else}
-            <div class="badge badge-error">Signature forged! The message may have been sent by a hacker!</div>
+        {#if msg.sender != memberID}
+            {#if msg.verified}
+                <div class="badge badge-success">Verified</div>
+            {:else}
+                <div class="badge badge-error">Signature forged! The message may have been sent by a hacker!</div>
+            {/if}
         {/if}
     </h3>
-      <div class="text-lg">{msg.text}</div>
+    <div class="text-lg">{msg.text}</div>
     </div>
   </div>
 {/each}
+<input class="w-full h-8" placeholder="Press enter to send message" />
