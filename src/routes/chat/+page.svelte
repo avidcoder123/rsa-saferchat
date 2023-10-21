@@ -81,8 +81,7 @@
 </script>
 {#each chatList as msg}
 <div class="flex flex-col">
-    <!-- TODO: Gap between msgs -->
-    <div class={"py-2 alert " + (msg.sender == memberID ? "alert-success" : "")}>
+    <div class={"my-2 alert " + (msg.sender == memberID ? "alert-success" : "")}>
         <div>
           <h3 class="font-bold">
             {msg.sender == memberID ? "You" : members[msg.sender - 1]}
