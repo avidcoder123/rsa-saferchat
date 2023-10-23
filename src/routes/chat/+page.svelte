@@ -114,7 +114,7 @@
 
 </script>
 <div>
-    <h1 class="text-white text-xl text-center">
+    <h1 class="text-white text-xl text-center fixed top-0">
         {members[memberID == 1 ? 1 : 0]}
         <div class={"badge badge-" + (otherOnline ? "success" : "error")}>{otherOnline ? "Online" : "Offline"}</div>
     </h1>
