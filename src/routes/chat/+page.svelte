@@ -116,7 +116,7 @@
 <div>
     <h1 class="text-white text-xl text-center">
         {members[memberID == 1 ? 1 : 0]}
-        <div class={"badge badge-" + (otherOnline ? "success" : "error")}>{otherOnline ? "Online" : "Offline (Only your most recent message will show)"}</div>
+        <div class={"badge badge-" + (otherOnline ? "success" : "error")}>{otherOnline ? "Online" : "Offline"}</div>
     </h1>
 </div>
 <div class="flex flex-col gap-1 overflow-y-auto mb-12 pb-1 mt-4" id="messageslist">
