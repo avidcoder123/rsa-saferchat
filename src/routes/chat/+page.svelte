@@ -6,6 +6,8 @@
     import { onMount } from "svelte";
     import { get as getVal } from "svelte/store";
 
+    Notification.requestPermission()
+
     let chatid = getVal(currentChatStore)
     let privateKey = getVal(privateKeyStore)
     let myPublicKey = getVal(publicKeyStore)
@@ -57,6 +59,7 @@
         // }
 
         onValue(ref(db, `chats/${chatid}/chat${memberID}`), x => {
+
             let msg = x.val()
             let decryptedMsg = cryptico.decrypt(msg, privateKey)
             chatList = [...chatList, ({
@@ -64,6 +67,9 @@
                 text: decodeURI(decryptedMsg.plaintext),
                 verified: decryptedMsg.signature == "verified" && decryptedMsg.publicKeyString == otherPublicKey
             })]
+            if (Notification.permission === "granted" && !document.hasFocus()) {
+                const notification = new Notification("New unread message");
+            }
             let msgbox = document.getElementById("scrollTo")!
             msgbox.scrollIntoView();
         })
