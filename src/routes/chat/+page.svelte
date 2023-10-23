@@ -22,6 +22,8 @@
     
     let otherPublicKey = ""
 
+    let otherOnline = false
+
     let chatList: {
         sender: number,
         text: string,
@@ -65,6 +67,20 @@
             let msgbox = document.getElementById("scrollTo")!
             msgbox.scrollIntoView();
         })
+
+        setInterval(() => {
+            set(ref(db, `chats/${chatid}/ping${memberID}`), Date.now())
+        }, 1000)
+
+        setInterval(async () => {
+            let x = await get(child(ref(db), `chats/${chatid}/ping${memberID == 1 ? 2 : 1}`))
+            let time = parseInt(x.val())
+            if(Date.now() - time < 1000) {
+                otherOnline = true
+            } else {
+                otherOnline = false
+            }
+        }, 1000)
     })
 
     onMount(() => {
@@ -97,7 +113,13 @@
     }
 
 </script>
-<div class="flex flex-col gap-1 overflow-y-auto mb-12 pb-1" id="messageslist">
+<div>
+    <h1 class="text-white text-xl text-center">
+        {members[memberID == 1 ? 1 : 0]}
+        <div class={"badge badge-" + (otherOnline ? "success" : "error")}>{otherOnline ? "Online" : "Offline (Only your most recent message will show)"}</div>
+    </h1>
+</div>
+<div class="flex flex-col gap-1 overflow-y-auto mb-12 pb-1 mt-4" id="messageslist">
     {#each chatList as msg}
         <div class={"alert " + (msg.sender == memberID ? "alert-success" : "")}>
             <div>
