@@ -118,6 +118,10 @@
 
     }
 
+    function file() {
+        
+    }
+
 </script>
 <div class="fixed top-0 items-center justify-center flex w-full h-10 bg-slate-700">
     <h1 class="text-white text-xl text-center">
@@ -146,6 +150,7 @@
     <span id="scrollTo"></span>
 </div>
 <div class="flex flex-row fixed bottom-0 w-full h-12">
-    <input class="w-[85%] h-12 pl-2" placeholder="Enter message" id="chatbox" bind:value={chatText} autofocus/>
+    <input class="w-[75%] h-12 pl-2" placeholder="Enter message" id="chatbox" bind:value={chatText} autofocus/>
+    <button class="w-[10%] h-12 text-black text-lg bg-blue-500" id="submit" on:click={file}>Upload File</button>
     <button class="w-[15%] h-12 bg-success text-black text-lg" id="submit" on:click={sendMsg}>Send</button>
 </div>
