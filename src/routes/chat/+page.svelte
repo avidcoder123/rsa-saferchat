@@ -119,13 +119,13 @@
     }
 
 </script>
-<div>
-    <h1 class="text-white text-xl text-center fixed top-0">
+<div class="fixed top-0 items-center justify-center flex w-full h-10 bg-slate-700">
+    <h1 class="text-white text-xl text-center">
         {members[memberID == 1 ? 1 : 0]}
         <div class={"badge badge-" + (otherOnline ? "success" : "error")}>{otherOnline ? "Online" : "Offline"}</div>
     </h1>
 </div>
-<div class="flex flex-col gap-1 overflow-y-auto mb-12 pb-1 mt-4" id="messageslist">
+<div class="flex flex-col gap-1 overflow-y-auto mb-12 pb-1 mt-10" id="messageslist">
     {#each chatList as msg}
         <div class={"alert " + (msg.sender == memberID ? "alert-success" : "")}>
             <div>
