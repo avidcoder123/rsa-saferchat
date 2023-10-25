@@ -32,6 +32,11 @@
         verified: boolean
     }[] = []
 
+    const configuration = { iceServers: [] }; // No TURN server specified
+
+    const peerConnection = new RTCPeerConnection(configuration);
+    const dataChannel = peerConnection.createDataChannel(chatid);
+
     get(child(ref(db), "chats/" + chatid)).then(x => x.val()).then(c => {
         members = [c.member1, c.member2]
         let otherID = ""
@@ -47,16 +52,39 @@
     }).then(user => otherPublicKey = user.publicKey)
     .then(() => get(child(ref(db), "chats/" + chatid)).then(x => x.val()))
     .then(chat => {
-        // if(chat) {
-        //     let encryptedMsg = chat["chat" + memberID] as string
-        //     let decryptedMsg = cryptico.decrypt(encryptedMsg, privateKey)
-        //     console.log(decryptedMsg)
-        //     chatList = [...chatList, ({
-        //         sender: memberID == 1 ? 2 : 1,
-        //         text: decodeURI(decryptedMsg.plaintext),
-        //         verified: decryptedMsg.signature == "verified" && decryptedMsg.publicKeyString == otherPublicKey
-        //     })]
-        // }
+
+        let offerer = false
+        //If there's no offer, then send a WebRTC offer
+        onValue(ref(db, "chats/" + chatid + "/webrtc-offer"), x => {
+            if(!offerer) {
+                let offer = x.val()
+                if(offer) {
+                    peerConnection.setRemoteDescription(offer).then(() => {
+                        return peerConnection.createAnswer();
+                    }).then((answer) => {
+                        return peerConnection.setLocalDescription(answer);
+                    }).then(() => {
+                        set(ref(db, "chats/" + chatid + "/webrtc-answer"), peerConnection.localDescription)
+                    })
+                } else {
+                    peerConnection.createOffer().then((offer) => {
+                        return peerConnection.setLocalDescription(offer);
+                    }).then(() => {
+                    // Send the offer to the other peer via Firebase
+                        set(ref(db, "chats/" + chatid + "/webrtc-offer"), peerConnection.localDescription)
+                        offerer = true
+                    })
+                }
+            }
+        }, {
+            onlyOnce: true
+        })
+
+        //TODO: If the offerer, on the receiving of the answer, se the local Description.
+        //Continued instructions in ChatGPT.
+        //Event handlers
+
+
 
         onValue(ref(db, `chats/${chatid}/chat${memberID}`), x => {
 
