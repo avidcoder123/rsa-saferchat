@@ -7,7 +7,7 @@
 
     let ownID = getVal(userIdStore)
 
-    if(getVal(publicKeyStore).length == 0) {
+    if(ownID.length == 0) {
         goto("/")
     }
 

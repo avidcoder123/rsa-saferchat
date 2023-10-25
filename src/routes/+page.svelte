@@ -19,12 +19,14 @@
         .then(val => {
             if(!val) return alert("User doesn't exist")
             if(val.password == SHA256(login_password)) {
-                const key = cryptico.generateRSAKey(login_username + login_password, 2048)
-                const publicKey = cryptico.publicKeyString(key)
-                privateKeyStore.set(key)
-                publicKeyStore.set(publicKey)
                 userIdStore.set(MD5(SHA256(login_username)))
-                return goto("/home")
+                return goto("/home").then(async () => {
+                    console.log("Running")
+                    const key = cryptico.generateRSAKey(login_username + login_password, 2048)
+                    const publicKey = cryptico.publicKeyString(key)
+                    privateKeyStore.set(key)
+                    publicKeyStore.set(publicKey)
+                })
             } else {
                 return alert("Wrong login.")
             }
@@ -40,16 +42,18 @@
         if(existingUser) {
             return alert("Username already taken.")
         }
-        const key = cryptico.generateRSAKey(register_username + register_password, 2048)
-        const publicKey = cryptico.publicKeyString(key)
-        await set(ref(db, `users/${hashedUname}`), {
-            password: SHA256(register_password),
-            publicKey
-        })
-        privateKeyStore.set(key)
-        publicKeyStore.set(publicKey)
         userIdStore.set(hashedUname)
-        return goto("/home")
+        return goto("/home").then(async () => {
+            console.log("Running")
+            const key = cryptico.generateRSAKey(register_username + register_password, 2048)
+            const publicKey = cryptico.publicKeyString(key)
+            await set(ref(db, `users/${hashedUname}`), {
+                password: SHA256(register_password),
+                publicKey
+            })
+            privateKeyStore.set(key)
+            publicKeyStore.set(publicKey)
+        })
     }
 
 </script>

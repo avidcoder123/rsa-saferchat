@@ -13,7 +13,7 @@
     let myPublicKey = getVal(publicKeyStore)
     let myID = getVal(userIdStore)
     if(chatid.length == 0 || myPublicKey.length == 0) {
-        goto("/")
+        goto("/home")
     }
 
     //Whether you are user 1 or 2 in the chat
