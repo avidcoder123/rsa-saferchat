@@ -35,7 +35,7 @@
     const configuration = { iceServers: [] }; // No TURN server specified
 
     const peerConnection = new RTCPeerConnection(configuration);
-    const dataChannel = peerConnection.createDataChannel(chatid);
+    let dataChannel: RTCDataChannel | undefined = undefined
 
     get(child(ref(db), "chats/" + chatid)).then(x => x.val()).then(c => {
         members = [c.member1, c.member2]
@@ -53,12 +53,51 @@
     .then(() => get(child(ref(db), "chats/" + chatid)).then(x => x.val()))
     .then(async chat => {
 
-        let offer = await get(child(ref(db), "chats/" + chatid + "webrtc-offer")).then(x => x.val())
+        let offer = await get(child(ref(db), "chats/" + chatid + "/webrtc-offer")).then(x => x.val())
+        console.log(offer)
         if(offer) {
-            peerConnection.setRemoteDescription(offer)
+            peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+            console.log(peerConnection.remoteDescription)
             let answer = await peerConnection.createAnswer()
-            peerConnection.setLocalDescription(answer)
-            set(ref(db, "chats/" + chatid + "webrtc-answer"), answer)
+            await peerConnection.setLocalDescription(answer)
+            let session = {
+                sdp: peerConnection.localDescription!.sdp,
+                type: peerConnection.localDescription!.type
+            }
+            set(ref(db, "chats/" + chatid + "/webrtc-answer"), session)
+            set(ref(db, "chats/" + chatid + "/webrtc-offer"), null)
+
+            peerConnection.ondatachannel = (event) => {
+                dataChannel = event.channel;
+
+                dataChannel.onmessage = (event) => {
+                    const message = event.data;
+                    // Handle the received message
+                    console.log(message)
+                };
+            };
+        } else {
+            let offer = await peerConnection.createOffer()
+            await peerConnection.setLocalDescription(offer)
+            let session = {
+                sdp: peerConnection.localDescription!.sdp,
+                type: peerConnection.localDescription!.type
+            }
+            await set(ref(db, "chats/" + chatid + "/webrtc-offer"), session)
+
+            onValue(ref(db, "chats/" + chatid + "/webrtc-answer"), x => {
+                let answer = x.val()
+                if(!answer) return
+                peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+                .then(() => {
+                    return set(ref(db, "chats/" + chatid + "/webrtc-answer"), null)
+                }).then(() => {
+                    dataChannel = peerConnection.createDataChannel(chatid)
+                    dataChannel.send("Hola Haiwan")
+                })
+            }, {
+                onlyOnce: true
+            })
         }
 
         //If there's no offer, then send a WebRTC offer
