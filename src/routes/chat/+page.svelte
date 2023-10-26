@@ -87,6 +87,7 @@
 
             onValue(ref(db, "chats/" + chatid + "/webrtc-answer"), x => {
                 let answer = x.val()
+                console.log(answer)
                 if(!answer) return
                 peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
                 .then(() => {
@@ -95,8 +96,6 @@
                     dataChannel = peerConnection.createDataChannel(chatid)
                     dataChannel.send("Hola Haiwan")
                 })
-            }, {
-                onlyOnce: true
             })
         }
 
