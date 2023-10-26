@@ -51,34 +51,41 @@
         return get(child(ref(db), "users/" + otherID)).then(x => x.val())
     }).then(user => otherPublicKey = user.publicKey)
     .then(() => get(child(ref(db), "chats/" + chatid)).then(x => x.val()))
-    .then(chat => {
+    .then(async chat => {
 
-        let offerer = false
+        let offer = await get(child(ref(db), "chats/" + chatid + "webrtc-offer")).then(x => x.val())
+        if(offer) {
+            peerConnection.setRemoteDescription(offer)
+            let answer = await peerConnection.createAnswer()
+            peerConnection.setLocalDescription(answer)
+            set(ref(db, "chats/" + chatid + "webrtc-answer"), answer)
+        }
+
         //If there's no offer, then send a WebRTC offer
-        onValue(ref(db, "chats/" + chatid + "/webrtc-offer"), x => {
-            if(!offerer) {
-                let offer = x.val()
-                if(offer) {
-                    peerConnection.setRemoteDescription(offer).then(() => {
-                        return peerConnection.createAnswer();
-                    }).then((answer) => {
-                        return peerConnection.setLocalDescription(answer);
-                    }).then(() => {
-                        set(ref(db, "chats/" + chatid + "/webrtc-answer"), peerConnection.localDescription)
-                    })
-                } else {
-                    peerConnection.createOffer().then((offer) => {
-                        return peerConnection.setLocalDescription(offer);
-                    }).then(() => {
-                    // Send the offer to the other peer via Firebase
-                        set(ref(db, "chats/" + chatid + "/webrtc-offer"), peerConnection.localDescription)
-                        offerer = true
-                    })
-                }
-            }
-        }, {
-            onlyOnce: true
-        })
+        // onValue(ref(db, "chats/" + chatid + "/webrtc-offer"), x => {
+        //     if(!offerer) {
+        //         let offer = x.val()
+        //         if(offer) {
+        //             peerConnection.setRemoteDescription(offer).then(() => {
+        //                 return peerConnection.createAnswer();
+        //             }).then((answer) => {
+        //                 return peerConnection.setLocalDescription(answer);
+        //             }).then(() => {
+        //                 set(ref(db, "chats/" + chatid + "/webrtc-answer"), peerConnection.localDescription)
+        //             })
+        //         } else {
+        //             peerConnection.createOffer().then((offer) => {
+        //                 return peerConnection.setLocalDescription(offer);
+        //             }).then(() => {
+        //             // Send the offer to the other peer via Firebase
+        //                 set(ref(db, "chats/" + chatid + "/webrtc-offer"), peerConnection.localDescription)
+        //                 offerer = true
+        //             })
+        //         }
+        //     }
+        // }, {
+        //     onlyOnce: true
+        // })
 
         //TODO: If the offerer, on the receiving of the answer, se the local Description.
         //Continued instructions in ChatGPT.
